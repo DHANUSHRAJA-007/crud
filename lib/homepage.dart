@@ -47,7 +47,7 @@ class _HomepageState extends State<Homepage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => openNotebox,
         backgroundColor: Colors.blue,
-        child: Icon(Icons.add),
+        child: Icon(Icons.remove),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: firestoreService.getnotesstream(),
