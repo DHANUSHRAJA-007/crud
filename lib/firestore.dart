@@ -27,7 +27,7 @@ class FirestoreService {
 
     await notes.doc(docID).update({
       'note': newtext.trim(),
-      'timestamp': Timestamp.now(), // ✅ same field name
+      'timestamp': Timestamp.now(),
     });
   }
 }
