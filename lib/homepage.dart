@@ -51,30 +51,43 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.notes, color: Colors.white),
+            SizedBox(width: 8),
             Text("Notes", style: TextStyle(color: Colors.white)),
           ],
         ),
         backgroundColor: Colors.blue,
       ),
+
       floatingActionButton: FloatingActionButton(
         tooltip: "Tap to Add notes",
         backgroundColor: Colors.blue,
         onPressed: () => openNotebox(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
+
       body: StreamBuilder<QuerySnapshot>(
         stream: firestoreService.getnotesstream(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          /// 🔄 LOADING
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          /// ❌ ERROR
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+
+          /// 📭 EMPTY
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("No notes"));
           }
 
@@ -86,7 +99,7 @@ class _HomepageState extends State<Homepage> {
               final document = notesList[index];
               final docID = document.id;
               final data = document.data() as Map<String, dynamic>;
-              final noteText = data['note'];
+              final noteText = data['note'] ?? '';
 
               return Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -97,13 +110,16 @@ class _HomepageState extends State<Homepage> {
 
                     trailing: Wrap(
                       children: [
+                        /// ✏️ EDIT
                         IconButton(
                           tooltip: "Edit",
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            openNotebox();
+                            openNotebox(docID: docID, existingText: noteText);
                           },
                         ),
+
+                        /// 🗑 DELETE
                         IconButton(
                           tooltip: "Delete",
                           icon: const Icon(Icons.delete),
